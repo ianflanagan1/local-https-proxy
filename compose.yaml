@@ -1,0 +1,58 @@
+name: local-https-proxy
+
+networks:
+  # Stacks join this to be routed to. Fixed name, so their compose files can declare it external.
+  ingress:
+    name: local-https-proxy
+  # Only the proxy reaches the Docker API.
+  docker-api:
+    internal: true
+
+volumes:
+  # Certificates and the ACME account. Keep it: each certificate is issued once and renewed here.
+  caddy-data:
+
+services:
+
+  caddy:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - docker-api
+    environment:
+      DOCKER_HOST: tcp://docker-api:2375
+      CADDY_INGRESS_NETWORKS: local-https-proxy
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:?set it in .env}
+    # Upstreams for Docker's own DNS, which still resolves container names. The ACME DNS challenge
+    # looks up the zone's SOA record, and some hosts' resolvers return it empty (Colima's does).
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    labels:
+      # A global option, merged into the Caddyfile caddy-docker-proxy builds from every label
+      caddy.acme_dns: cloudflare {env.CLOUDFLARE_API_TOKEN}
+    volumes:
+      - caddy-data:/data:rw
+    networks:
+      - ingress
+      - docker-api
+    ports:
+      # Loopback only: dev stacks aren't served to the local network
+      - 127.0.0.1:80:80
+      - 127.0.0.1:443:443
+
+  # Read-only Docker API: caddy-docker-proxy lists containers and networks and watches events.
+  # Mounting the socket itself would hand the proxy root on the host.
+  docker-api:
+    image: docker.io/tecnativa/docker-socket-proxy:v0.5.0
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      NETWORKS: 1
+      EVENTS: 1
+      INFO: 1  # its Swarm check
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker-api

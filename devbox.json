@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.18.4/.schema/devbox.schema.json",
+  "packages": [],
+  "shell": {
+    "scripts": {
+      "up": "docker compose up --build --detach",
+      "down": "docker compose down",
+      "logs": "docker compose logs --follow caddy",
+      "config": "docker compose exec caddy cat /config/caddy/autosave.json"
+    }
+  }
+}
