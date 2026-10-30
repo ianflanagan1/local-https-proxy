@@ -24,9 +24,9 @@ Once per machine. You need Docker and a domain whose DNS is on Cloudflare. Below
    Then open `.env` in an editor and paste the token after `CLOUDFLARE_API_TOKEN=`. An editor keeps it out of your shell history.
 5. **Start it.**
    ```sh
-   devbox run up
+   devbox run -- task up
    ```
-   It restarts with Docker. `devbox run logs` shows each certificate as it's issued.
+   It restarts with Docker. `devbox run -- task logs` shows each certificate as it's issued.
 
 Ports 80 and 443 must be free on 127.0.0.1.
 
@@ -60,10 +60,10 @@ The proxy passes `X-Forwarded-For`, `X-Forwarded-Proto` and `X-Forwarded-Host` u
 
 | | |
 |---|---|
-| `devbox run up` | Build and start the proxy |
-| `devbox run down` | Stop it. Certificates are kept |
-| `devbox run logs` | Follow Caddy's log: routes as they change, certificates as they're issued |
-| `devbox run config` | Show the config Caddy is running, built from every running container's labels |
+| `devbox run -- task up` | Build and start the proxy |
+| `devbox run -- task down` | Stop it. Certificates are kept |
+| `devbox run -- task logs` | Follow Caddy's log: routes as they change, certificates as they're issued |
+| `devbox run -- task config` | Show the config Caddy is running, built from every running container's labels |
 
 ## Notes
 

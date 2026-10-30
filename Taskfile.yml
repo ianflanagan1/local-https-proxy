@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  up:
+    desc: Build and start the proxy
+    cmds:
+      - docker compose up --build --detach
+
+  down:
+    desc: Stop it. Certificates are kept
+    cmds:
+      - docker compose down
+
+  logs:
+    desc: "Follow Caddy's log: routes as they change, certificates as they're issued"
+    cmds:
+      - docker compose logs --follow caddy
+
+  config:
+    desc: Show the config Caddy is running, built from every running container's labels
+    cmds:
+      - docker compose exec caddy cat /config/caddy/autosave.json
